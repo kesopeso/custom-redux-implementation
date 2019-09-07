@@ -1,0 +1,29 @@
+#!/usr/bin/env bash
+
+export FRONTEND_PORT=${FRONTEND_PORT:-3000}
+
+USER_GROUP="-u ${USER_GROUP:-"1000:1000"}"
+
+COMPOSE="docker-compose -f docker-compose.yml"
+CONTAINER_NAME=cr.react
+
+if [ $# -gt 0 ];then
+    if [ "$1" == "npm" ]; then
+        shift 1
+        $COMPOSE run --rm $TTY $USER_GROUP $CONTAINER_NAME npm "$@"
+    elif [ "$1" == "npx" ]; then
+        shift 1
+        $COMPOSE run --rm $TTY $USER_GROUP $CONTAINER_NAME npx "$@"
+    elif [ "$1" == "serve" ]; then
+        $COMPOSE run --rm $TTY $USER_GROUP $CONTAINER_NAME serve
+    elif [ "$1" == "exec" ]; then
+        shift 1
+        $COMPOSE exec "$@"
+    elif [ "$1" == "logs" ]; then
+        $COMPOSE logs --timestamps --follow --tail=200 $CONTAINER_NAME
+    else
+        $COMPOSE "$@"
+    fi
+else
+    $COMPOSE ps
+fi
